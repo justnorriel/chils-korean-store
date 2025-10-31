@@ -29,6 +29,16 @@ router.post('/login', async (req, res) => {
     const { email, password } = req.body;
     
     console.log('🔐 Login attempt for:', email);
+    
+    // Check database connection
+    const mongoose = require('mongoose');
+    if (mongoose.connection.readyState !== 1) {
+      console.log('❌ Database not connected during login attempt');
+      return res.status(503).render('auth/login', {
+        error: 'Database temporarily unavailable. Please try again in a moment.',
+        title: 'Login - Chil\'s Korean Store'
+      });
+    }
 
     // Input validation
     if (!email || !password) {
@@ -92,7 +102,16 @@ router.post('/login', async (req, res) => {
     }
 
   } catch (error) {
-    console.error('❌ Login error:', error);
+    console.error('❌ Login error:', error.message);
+    console.error('❌ Full error:', error);
+    
+    // Check for specific database errors
+    if (error.name === 'MongooseServerSelectionError') {
+      console.error('❌ Database connection error - MongoDB not reachable');
+    } else if (error.name === 'MongoTimeoutError') {
+      console.error('❌ Database timeout error');
+    }
+    
     res.status(500).render('auth/login', {
       error: 'Login failed. Please try again later.',
       title: 'Login - Chil\'s Korean Store'
