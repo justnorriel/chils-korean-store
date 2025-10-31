@@ -9,6 +9,24 @@ const path = require('path');
 
 require('dotenv').config();
 
+console.log('🚀 Starting Chil\'s Korean Store...');
+console.log('📋 Environment:', process.env.NODE_ENV || 'development');
+console.log('🔗 MongoDB URI:', process.env.MONGODB_URI ? 'Set ✅' : 'Not set ❌');
+console.log('🔐 Session Secret:', process.env.SESSION_SECRET ? 'Set ✅' : 'Not set ❌');
+console.log('🌐 PORT:', process.env.PORT || '3000 (default)');
+
+// Global error handlers
+process.on('uncaughtException', (error) => {
+  console.error('❌ Uncaught Exception:', error);
+  console.error('Stack:', error.stack);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ Unhandled Rejection at:', promise);
+  console.error('Reason:', reason);
+});
+
 const app = express();
 
 // MongoDB connection with better error handling
@@ -202,7 +220,7 @@ console.log('🎉 All routes loaded successfully');
 const PORT = process.env.PORT || 3000;
 
 // Start server immediately - don't wait for database
-app.listen(PORT, '0.0.0.0', () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`
 🚀 Server running on port ${PORT}
 📍 URLs:
@@ -214,7 +232,17 @@ app.listen(PORT, '0.0.0.0', () => {
    • Products test: http://localhost:${PORT}/api/test/products
 
 📊 Environment: ${process.env.NODE_ENV || 'development'}
+✅ Server is ready to accept connections
   `);
+});
+
+// Handle server errors
+server.on('error', (error) => {
+  console.error('❌ Server error:', error);
+  if (error.code === 'EADDRINUSE') {
+    console.error(`❌ Port ${PORT} is already in use`);
+  }
+  process.exit(1);
 });
 
 // Start database connection in background
