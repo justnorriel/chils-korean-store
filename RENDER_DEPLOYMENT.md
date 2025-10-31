@@ -32,7 +32,7 @@ In Render dashboard, go to your service → Environment and add:
 
 ```bash
 NODE_ENV=production
-MONGODB_URI=mongodb+srv://fabrianorriel_db_user:gsapdslgsKI8ZFDu@cluster0.ffganpu.mongodb.net/chils_korean_store?retryWrites=true&w=majority
+MONGODB_URI=mongodb+srv://fabrianorriel_db_user:NKst9t84GbdEnrKN@cluster0.ffganpu.mongodb.net/chils_korean_store?retryWrites=true&w=majority
 SESSION_SECRET=your_very_long_random_secret_here_at_least_32_characters
 ```
 
@@ -95,7 +95,7 @@ NODE_ENV=production
 PORT=10000
 
 # MongoDB Atlas Connection
-MONGODB_URI=mongodb+srv://fabrianorriel_db_user:gsapdslgsKI8ZFDu@cluster0.ffganpu.mongodb.net/chils_korean_store?retryWrites=true&w=majority
+MONGODB_URI=mongodb+srv://fabrianorriel_db_user:NKst9t84GbdEnrKN@cluster0.ffganpu.mongodb.net/chils_korean_store?retryWrites=true&w=majority
 
 # Session Security
 SESSION_SECRET=4bacd9d2447a789e2c049c3883c1c1efa7191193a12b22e6d41148b53b917b5
