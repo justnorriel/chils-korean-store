@@ -29,6 +29,9 @@ process.on('unhandledRejection', (reason, promise) => {
 
 const app = express();
 
+// Trust proxy for Railway (behind reverse proxy)
+app.set('trust proxy', 1);
+
 // MongoDB connection with better error handling
 const connectDB = async () => {
   try {

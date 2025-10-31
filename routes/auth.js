@@ -97,12 +97,23 @@ router.post('/login', async (req, res) => {
 
     console.log('✅ Login successful:', user.email, 'Role:', user.role);
 
-    // Redirect based on role
-    if (user.role === 'admin') {
-      res.redirect('/admin/dashboard');
-    } else {
-      res.redirect('/customer/dashboard');
-    }
+    // Save session before redirect
+    req.session.save((err) => {
+      if (err) {
+        console.error('❌ Session save error:', err);
+        return res.status(500).render('auth/login', {
+          error: 'Login failed. Please try again.',
+          title: 'Login - Chil\'s Korean Store'
+        });
+      }
+      
+      // Redirect based on role
+      if (user.role === 'admin') {
+        return res.redirect('/admin/dashboard');
+      } else {
+        return res.redirect('/customer/dashboard');
+      }
+    });
 
   } catch (error) {
     console.error('❌ Login error:', error.message);
