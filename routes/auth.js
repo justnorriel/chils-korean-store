@@ -4,11 +4,6 @@ const User = require('../models/User');
 
 const router = express.Router();
 
-// Disable Mongoose buffering for this route
-const mongoose = require('mongoose');
-mongoose.set('bufferCommands', false);
-mongoose.set('bufferMaxEntries', 0);
-
 // Login page
 router.get('/login', (req, res) => {
   // If user is already logged in, redirect to appropriate dashboard
@@ -35,21 +30,13 @@ router.post('/login', async (req, res) => {
     
     console.log('🔐 Login attempt for:', email);
     
-    // Check database connection and wait if needed
+    // Immediate database connection check
     const mongoose = require('mongoose');
-    let attempts = 0;
-    const maxAttempts = 3;
-    
-    while (mongoose.connection.readyState !== 1 && attempts < maxAttempts) {
-      console.log(`⏳ Waiting for database connection... (attempt ${attempts + 1}/${maxAttempts})`);
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      attempts++;
-    }
-    
     if (mongoose.connection.readyState !== 1) {
-      console.log('❌ Database not connected during login attempt');
+      console.log('❌ Database not connected - Current state:', mongoose.connection.readyState);
+      console.log('❌ States: 0=disconnected, 1=connected, 2=connecting, 3=disconnecting');
       return res.status(503).render('auth/login', {
-        error: 'Database temporarily unavailable. Please try again in a moment.',
+        error: 'Database temporarily unavailable. Please refresh the page and try again.',
         title: 'Login - Chil\'s Korean Store'
       });
     }

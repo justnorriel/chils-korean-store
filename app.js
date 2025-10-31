@@ -1,14 +1,14 @@
-const express = require('express');
+// Disable Mongoose buffering immediately - before any other imports
 const mongoose = require('mongoose');
+mongoose.set('bufferCommands', false);
+mongoose.set('bufferMaxEntries', 0);
+
+const express = require('express');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const path = require('path');
 
 require('dotenv').config();
-
-// Set global Mongoose options to prevent buffering timeouts
-mongoose.set('bufferCommands', false);
-mongoose.set('bufferMaxEntries', 0);
 
 const app = express();
 
