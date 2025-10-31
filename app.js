@@ -78,6 +78,14 @@ try {
   console.log('❌ Error loading auth routes:', error.message);
 }
 
+// Debug route for troubleshooting
+try {
+  app.use('/debug', require('./routes/debug'));
+  console.log('✅ Debug route loaded');
+} catch (error) {
+  console.log('❌ Error loading debug route:', error.message);
+}
+
 // Admin routes
 try {
   const adminRoutes = require('./routes/admin');
