@@ -1,0 +1,33 @@
+version: '3.8'
+services:
+  mongodb:
+    image: mongo:5
+    container_name: chils-korean-store-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - chils_mongodb_data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=chils_korean_store
+    restart: unless-stopped
+
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/chils_korean_store
+      - JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+      - JWT_EXPIRES_IN=7d
+      - SESSION_SECRET=your-super-secret-session-key-change-this-too
+      - EMAIL_USER=your-email@gmail.com
+      - EMAIL_PASS=your-app-password
+      - PORT=3000
+    volumes:
+      - ./uploads:/app/uploads
+    depends_on:
+      - mongodb
+    restart: unless-stopped
+
+volumes:
+  chils_mongodb_data:

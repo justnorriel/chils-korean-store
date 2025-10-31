@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="icon" type="image/png" href="/favicon/favicon.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5a6fd8;
+            --secondary: #764ba2;
+            --danger: #ef4444;
+            --dark: #1f2937;
+            --light: #f8fafc;
+            --gray: #6b7280;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--dark);
+        }
+
+        .error-container {
+            background: white;
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .error-icon {
+            font-size: 4rem;
+            color: var(--danger);
+            margin-bottom: 1.5rem;
+        }
+
+        .error-code {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .error-message {
+            font-size: 1.2rem;
+            color: var(--gray);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .error-details {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            text-align: left;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 2rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--gray);
+            margin-left: 1rem;
+        }
+
+        .btn-secondary:hover {
+            background: var(--dark);
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        
+        <% if (typeof error !== 'undefined' && error.status === 404) { %>
+            <div class="error-code">404</div>
+            <div class="error-message">
+                Page Not Found
+                <br>
+                <small>The page you're looking for doesn't exist.</small>
+            </div>
+        <% } else if (typeof error !== 'undefined' && error.status === 403) { %>
+            <div class="error-code">403</div>
+            <div class="error-message">
+                Access Denied
+                <br>
+                <small>You don't have permission to access this resource.</small>
+            </div>
+        <% } else if (typeof error !== 'undefined' && error.status === 401) { %>
+            <div class="error-code">401</div>
+            <div class="error-message">
+                Unauthorized
+                <br>
+                <small>Please log in to access this resource.</small>
+            </div>
+        <% } else { %>
+            <div class="error-code">500</div>
+            <div class="error-message">
+                <%= message || 'Something went wrong!' %>
+                <br>
+                <small>Please try again later or contact support.</small>
+            </div>
+        <% } %>
+
+        <% if (typeof error !== 'undefined' && error.stack && process.env.NODE_ENV === 'development') { %>
+            <div class="error-details">
+                <strong>Error Details:</strong><br>
+                <%= error.stack %>
+            </div>
+        <% } %>
+
+        <div class="actions">
+            <a href="/auth/login" class="btn">
+                <i class="fas fa-sign-in-alt"></i> Go to Login
+            </a>
+            <a href="/" class="btn btn-secondary">
+                <i class="fas fa-home"></i> Home
+            </a>
+        </div>
+    </div>
+</body>
+</html>
