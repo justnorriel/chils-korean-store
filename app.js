@@ -1,34 +1,53 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const session = require('express-session');
+const MongoStore = require('connect-mongo');
 const path = require('path');
 
 require('dotenv').config();
 
 const app = express();
 
-// MongoDB connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/chils_korean_store', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log('✅ MongoDB connected successfully'))
-.catch(err => {
-  console.log('❌ MongoDB connection error:', err);
-  console.log('🔗 MONGODB_URI:', process.env.MONGODB_URI ? 'Set' : 'Not set');
-  console.log('🔧 Environment:', process.env.NODE_ENV || 'development');
-});
+// MongoDB connection with better error handling
+const connectDB = async () => {
+  try {
+    const conn = await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/chils_korean_store', {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 5000, // 5 seconds timeout
+      socketTimeoutMS: 45000, // 45 seconds timeout
+      bufferMaxEntries: 0, // Disable mongoose buffering
+      bufferCommands: false, // Disable mongoose buffering
+    });
+    console.log('✅ MongoDB connected successfully');
+    console.log('📍 Database:', conn.connection.name);
+    return conn;
+  } catch (err) {
+    console.log('❌ MongoDB connection error:', err);
+    console.log('🔗 MONGODB_URI:', process.env.MONGODB_URI ? 'Set' : 'Not set');
+    console.log('🔧 Environment:', process.env.NODE_ENV || 'development');
+    process.exit(1); // Exit if cannot connect to database
+  }
+};
+
+// Connect to database
+connectDB();
 
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Session configuration
+// Session configuration with MongoDB store
 app.use(session({
   secret: process.env.SESSION_SECRET || 'chils-korean-store-session-secret-2024',
   resave: false,
   saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGODB_URI || 'mongodb://localhost:27017/chils_korean_store',
+    collectionName: 'sessions',
+    ttl: 24 * 60 * 60 // 24 hours
+  }),
   cookie: {
     secure: process.env.NODE_ENV === 'production', // Set to true in production with HTTPS
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
