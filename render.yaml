@@ -1,0 +1,36 @@
+services:
+  # Web Service
+  - type: web
+    name: chils-korean-store
+    env: docker
+    repo: https://github.com/justnorriel/chils-korean-store.git
+    rootDir: .
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGODB_URI
+        value: ${MONGODB_URI}
+      - key: SESSION_SECRET
+        value: ${SESSION_SECRET}
+    disk:
+      name: uploads
+      mountPath: /app/uploads
+      sizeGB: 1
+
+  # Database (Optional - can use external free DB)
+  - type: pserv
+    name: mongodb
+    env: docker
+    repo: https://github.com/justnorriel/chils-korean-store.git
+    rootDir: ./mongodb
+    dockerfilePath: ./Dockerfile
+    plan: free
+    envVars:
+      - key: MONGO_INITDB_DATABASE
+        value: chils_korean_store

@@ -2,9 +2,11 @@ const mongoose = require('mongoose');
 const User = require('../models/User');
 const Product = require('../models/Product');
 
+require('dotenv').config();
+
 const initDatabase = async () => {
   try {
-    await mongoose.connect('mongodb://localhost:27017/chils_korean_store', {
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/chils_korean_store', {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });

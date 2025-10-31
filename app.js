@@ -13,7 +13,11 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/chils_kor
   useUnifiedTopology: true,
 })
 .then(() => console.log('✅ MongoDB connected successfully'))
-.catch(err => console.log('❌ MongoDB connection error:', err));
+.catch(err => {
+  console.log('❌ MongoDB connection error:', err);
+  console.log('🔗 MONGODB_URI:', process.env.MONGODB_URI ? 'Set' : 'Not set');
+  console.log('🔧 Environment:', process.env.NODE_ENV || 'development');
+});
 
 // Middleware
 app.use(express.json());
@@ -26,8 +30,9 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: false, // Set to true in production with HTTPS
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    secure: process.env.NODE_ENV === 'production', // Set to true in production with HTTPS
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    sameSite: 'lax' // Helps with CSRF protection
   }
 }));
 

@@ -97,24 +97,10 @@ const developmentAuth = (req, res, next) => {
   }
 };
 
-// Optional: JWT-based auth for future use
+// Session-based protection middleware
 const protect = async (req, res, next) => {
   try {
-    let token;
-    
-    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-      token = req.headers.authorization.split(' ')[1];
-    }
-
-    if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: 'Please log in to access this resource'
-      });
-    }
-
-    // For now, we'll use session-based auth instead of JWT
-    // This is kept for future implementation
+    // Check if user is logged in via session
     if (!req.session.user) {
       return res.status(401).json({
         success: false,
@@ -122,7 +108,9 @@ const protect = async (req, res, next) => {
       });
     }
 
+    // Add user to request object
     req.user = req.session.user;
+    console.log('✅ Protect middleware - User authenticated:', req.user.email, 'Role:', req.user.role);
     next();
   } catch (error) {
     return res.status(401).json({
@@ -132,7 +120,8 @@ const protect = async (req, res, next) => {
   }
 };
 
-module.exports = developmentAuth; // Use development auth as default for now
+module.exports = auth; // Use session-based auth as default
 module.exports.auth = auth;
 module.exports.authorize = authorize;
 module.exports.protect = protect;
+module.exports.developmentAuth = developmentAuth;
