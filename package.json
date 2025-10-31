@@ -7,7 +7,9 @@
     "start": "node app.js",
     "dev": "nodemon app.js",
     "init-db": "node scripts/init-database.js",
-    "create-users": "node scripts/create-production-users.js"
+    "create-users": "node scripts/create-production-users.js",
+    "test-mongodb": "node test-mongodb-connection.js",
+    "diagnose-mongodb": "node diagnose-mongodb.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

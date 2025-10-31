@@ -11,43 +11,97 @@ const app = express();
 // MongoDB connection with better error handling
 const connectDB = async () => {
   try {
+    console.log('🔗 Attempting to connect to MongoDB...');
+    console.log('📍 URI:', process.env.MONGODB_URI ? process.env.MONGODB_URI.replace(/\/\/([^:]+):[^@]+@/, '//***:***@') : 'Not set');
+    
     const conn = await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/chils_korean_store', {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      serverSelectionTimeoutMS: 5000, // 5 seconds timeout
-      socketTimeoutMS: 45000, // 45 seconds timeout
+      serverSelectionTimeoutMS: 30000, // 30 seconds timeout for Railway
+      socketTimeoutMS: 60000, // 60 seconds timeout
       bufferMaxEntries: 0, // Disable mongoose buffering
       bufferCommands: false, // Disable mongoose buffering
+      maxPoolSize: 10, // Maintain up to 10 socket connections
+      minPoolSize: 5, // Maintain at least 5 socket connections
+      connectTimeoutMS: 30000, // 30 seconds timeout for initial connection
     });
     console.log('✅ MongoDB connected successfully');
     console.log('📍 Database:', conn.connection.name);
+    console.log('🌐 Connection host:', conn.connection.host);
     return conn;
   } catch (err) {
-    console.log('❌ MongoDB connection error:', err);
+    console.log('❌ MongoDB connection error:', err.message);
     console.log('🔗 MONGODB_URI:', process.env.MONGODB_URI ? 'Set' : 'Not set');
     console.log('🔧 Environment:', process.env.NODE_ENV || 'development');
-    process.exit(1); // Exit if cannot connect to database
+    console.log('💡 Possible causes:');
+    console.log('   • Network connectivity issues');
+    console.log('   • MongoDB Atlas IP whitelist restrictions');
+    console.log('   • Invalid credentials or connection string');
+    console.log('   • Railway network policies');
+    
+    // Don't exit immediately in production, allow retry
+    if (process.env.NODE_ENV === 'production') {
+      console.log('⚠️  Running in production - will retry connection...');
+      return null;
+    } else {
+      process.exit(1); // Exit if cannot connect to database
+    }
   }
 };
 
-// Connect to database
-connectDB();
+// Connect to database with retry mechanism
+const connectWithRetry = async () => {
+  const maxRetries = 5;
+  const retryDelay = 5000; // 5 seconds
+  
+  for (let i = 0; i < maxRetries; i++) {
+    console.log(`🔄 Connection attempt ${i + 1}/${maxRetries}`);
+    const conn = await connectDB();
+    if (conn) {
+      return conn;
+    }
+    if (i < maxRetries - 1) {
+      console.log(`⏳ Waiting ${retryDelay/1000} seconds before retry...`);
+      await new Promise(resolve => setTimeout(resolve, retryDelay));
+    }
+  }
+  
+  console.log('❌ Failed to connect to MongoDB after multiple attempts');
+  if (process.env.NODE_ENV !== 'production') {
+    process.exit(1);
+  }
+};
+
+connectWithRetry();
 
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Session configuration with MongoDB store
+// Session configuration with MongoDB store and fallback
+const sessionStore = MongoStore.create({
+  mongoUrl: process.env.MONGODB_URI || 'mongodb://localhost:27017/chils_korean_store',
+  collectionName: 'sessions',
+  ttl: 24 * 60 * 60, // 24 hours
+  mongoOptions: {
+    serverSelectionTimeoutMS: 30000,
+    socketTimeoutMS: 60000,
+    connectTimeoutMS: 30000,
+  }
+});
+
+// Handle session store errors
+sessionStore.on('error', (err) => {
+  console.log('❌ Session store error:', err.message);
+  console.log('⚠️  Sessions will not persist across restarts');
+});
+
 app.use(session({
   secret: process.env.SESSION_SECRET || 'chils-korean-store-session-secret-2024',
   resave: false,
   saveUninitialized: false,
-  store: MongoStore.create({
-    mongoUrl: process.env.MONGODB_URI || 'mongodb://localhost:27017/chils_korean_store',
-    collectionName: 'sessions',
-    ttl: 24 * 60 * 60 // 24 hours
-  }),
+  store: sessionStore,
   cookie: {
     secure: process.env.NODE_ENV === 'production', // Set to true in production with HTTPS
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
