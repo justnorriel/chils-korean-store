@@ -1,7 +1,6 @@
 // Disable Mongoose buffering immediately - before any other imports
 const mongoose = require('mongoose');
 mongoose.set('bufferCommands', false);
-mongoose.set('bufferMaxEntries', 0);
 
 const express = require('express');
 const session = require('express-session');
@@ -23,7 +22,6 @@ const connectDB = async () => {
       useUnifiedTopology: true,
       serverSelectionTimeoutMS: 30000, // 30 seconds timeout for Railway
       socketTimeoutMS: 60000, // 60 seconds timeout
-      bufferMaxEntries: 0, // Disable mongoose buffering
       bufferCommands: false, // Disable mongoose buffering
       maxPoolSize: 3, // Smaller pool for Railway
       minPoolSize: 1, // Maintain 1 connection
