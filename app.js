@@ -199,6 +199,24 @@ try {
 
 console.log('🎉 All routes loaded successfully');
 
+const PORT = process.env.PORT || 3000;
+
+// Start server immediately - don't wait for database
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`
+🚀 Server running on port ${PORT}
+📍 URLs:
+   • Login page: http://localhost:${PORT}/auth/login
+   • Admin dashboard: http://localhost:${PORT}/admin/dashboard
+   • Customer dashboard: http://localhost:${PORT}/customer/dashboard
+   • API Health check: http://localhost:${PORT}/api/health
+   • Database test: http://localhost:${PORT}/api/test/database
+   • Products test: http://localhost:${PORT}/api/test/products
+
+📊 Environment: ${process.env.NODE_ENV || 'development'}
+  `);
+});
+
 // Start database connection in background
 connectWithRetry().then(() => {
   console.log('🚀 Database connection process completed');
@@ -380,27 +398,10 @@ app.use((err, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT || 3000;
-
 // Graceful shutdown
 process.on('SIGINT', async () => {
   console.log('🔄 Shutting down gracefully...');
   await mongoose.connection.close();
   console.log('✅ MongoDB connection closed');
   process.exit(0);
-});
-
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`
-🚀 Server running on port ${PORT}
-📍 URLs:
-   • Login page: http://localhost:${PORT}/auth/login
-   • Admin dashboard: http://localhost:${PORT}/admin/dashboard
-   • Customer dashboard: http://localhost:${PORT}/customer/dashboard
-   • API Health check: http://localhost:${PORT}/api/health
-   • Database test: http://localhost:${PORT}/api/test/database
-   • Products test: http://localhost:${PORT}/api/test/products
-
-📊 Environment: ${process.env.NODE_ENV || 'development'}
-  `);
 });
