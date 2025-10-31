@@ -4,6 +4,11 @@ const User = require('../models/User');
 
 const router = express.Router();
 
+// Disable Mongoose buffering for this route
+const mongoose = require('mongoose');
+mongoose.set('bufferCommands', false);
+mongoose.set('bufferMaxEntries', 0);
+
 // Login page
 router.get('/login', (req, res) => {
   // If user is already logged in, redirect to appropriate dashboard
@@ -30,8 +35,17 @@ router.post('/login', async (req, res) => {
     
     console.log('🔐 Login attempt for:', email);
     
-    // Check database connection
+    // Check database connection and wait if needed
     const mongoose = require('mongoose');
+    let attempts = 0;
+    const maxAttempts = 3;
+    
+    while (mongoose.connection.readyState !== 1 && attempts < maxAttempts) {
+      console.log(`⏳ Waiting for database connection... (attempt ${attempts + 1}/${maxAttempts})`);
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      attempts++;
+    }
+    
     if (mongoose.connection.readyState !== 1) {
       console.log('❌ Database not connected during login attempt');
       return res.status(503).render('auth/login', {
@@ -48,8 +62,11 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    // Find user by email
-    const user = await User.findOne({ email: email.toLowerCase() }).select('+password');
+    // Find user by email with explicit options
+    const user = await User.findOne({ email: email.toLowerCase() })
+      .select('+password')
+      .maxTimeMS(30000) // 30 second timeout for this query
+      .readPreference('primary');
     
     if (!user) {
       console.log('❌ User not found:', email);
