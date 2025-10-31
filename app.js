@@ -6,6 +6,10 @@ const path = require('path');
 
 require('dotenv').config();
 
+// Set global Mongoose options to prevent buffering timeouts
+mongoose.set('bufferCommands', false);
+mongoose.set('bufferMaxEntries', 0);
+
 const app = express();
 
 // MongoDB connection with better error handling
@@ -58,7 +62,17 @@ const connectWithRetry = async () => {
     console.log(`🔄 Connection attempt ${i + 1}/${maxRetries}`);
     const conn = await connectDB();
     if (conn) {
-      return conn;
+      // Wait for connection to be fully established
+      console.log('⏳ Waiting for connection to stabilize...');
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      if (mongoose.connection.readyState === 1) {
+        console.log('✅ Connection is stable and ready');
+        return conn;
+      } else {
+        console.log('❌ Connection not stable, retrying...');
+        await mongoose.connection.close();
+      }
     }
     if (i < maxRetries - 1) {
       console.log(`⏳ Waiting ${retryDelay/1000} seconds before retry...`);
@@ -67,12 +81,26 @@ const connectWithRetry = async () => {
   }
   
   console.log('❌ Failed to connect to MongoDB after multiple attempts');
-  if (process.env.NODE_ENV !== 'production') {
-    process.exit(1);
-  }
+  console.log('⚠️  Starting server without database - features will be limited');
+  return null;
 };
 
-connectWithRetry();
+// Start connection and wait for it to complete
+const dbConnection = connectWithRetry();
+
+// Middleware to check database connection
+app.use((req, res, next) => {
+  if (mongoose.connection.readyState !== 1) {
+    console.log('❌ Database not connected, blocking request');
+    if (req.path.startsWith('/api/') || req.path.includes('/login') || req.path.includes('/register')) {
+      return res.status(503).json({
+        success: false,
+        message: 'Database temporarily unavailable. Please try again in a moment.'
+      });
+    }
+  }
+  next();
+});
 
 // Middleware
 app.use(express.json());
