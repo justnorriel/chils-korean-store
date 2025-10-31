@@ -85,23 +85,6 @@ const connectWithRetry = async () => {
   return null;
 };
 
-// Start connection and wait for it to complete
-const dbConnection = connectWithRetry();
-
-// Middleware to check database connection
-app.use((req, res, next) => {
-  if (mongoose.connection.readyState !== 1) {
-    console.log('❌ Database not connected, blocking request');
-    if (req.path.startsWith('/api/') || req.path.includes('/login') || req.path.includes('/register')) {
-      return res.status(503).json({
-        success: false,
-        message: 'Database temporarily unavailable. Please try again in a moment.'
-      });
-    }
-  }
-  next();
-});
-
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -141,78 +124,88 @@ app.use(session({
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// Import models to ensure they're registered
-console.log('📦 Loading models...');
-require('./models/User');
-require('./models/Product');
-require('./models/Order');
-require('./models/Payment');
-console.log('✅ All models loaded');
+// Start connection and wait for it to complete
+connectWithRetry().then(() => {
+  console.log('🚀 Database connection process completed');
+  
+  // Only load models and routes after database is connected
+  console.log('📦 Loading models...');
+  require('./models/User');
+  require('./models/Product');
+  require('./models/Order');
+  require('./models/Payment');
+  console.log('✅ All models loaded');
 
-// Routes loading with better error handling
-console.log('🔄 Loading routes...');
+  // Routes loading with better error handling
+  console.log('🔄 Loading routes...');
 
-// Auth routes
-try {
-  app.use('/auth', require('./routes/auth'));
-  console.log('✅ Auth routes loaded');
-} catch (error) {
-  console.log('❌ Error loading auth routes:', error.message);
-}
+  // Auth routes
+  try {
+    app.use('/auth', require('./routes/auth'));
+    console.log('✅ Auth routes loaded');
+  } catch (error) {
+    console.log('❌ Error loading auth routes:', error.message);
+  }
 
-// Debug route for troubleshooting
-try {
-  app.use('/debug', require('./routes/debug'));
-  console.log('✅ Debug route loaded');
-} catch (error) {
-  console.log('❌ Error loading debug route:', error.message);
-}
+  // Debug route for troubleshooting
+  try {
+    app.use('/debug', require('./routes/debug'));
+    console.log('✅ Debug route loaded');
+  } catch (error) {
+    console.log('❌ Error loading debug route:', error.message);
+  }
 
-// Admin routes
-try {
-  const adminRoutes = require('./routes/admin');
-  app.use('/api/admin', adminRoutes);
-  console.log('✅ Admin routes loaded');
-} catch (error) {
-  console.log('❌ Error loading admin routes:', error.message);
-}
+  // Admin routes
+  try {
+    const adminRoutes = require('./routes/admin');
+    app.use('/api/admin', adminRoutes);
+    console.log('✅ Admin routes loaded');
+  } catch (error) {
+    console.log('❌ Error loading admin routes:', error.message);
+  }
 
-// Customer routes
-try {
-  console.log('Loading product routes...');
-  const productRoutes = require('./routes/productRoutes');
-  app.use('/api/customer', productRoutes);
-  console.log('✅ Product routes loaded');
-} catch (error) {
-  console.log('❌ Error loading product routes:', error.message);
-}
+  // Customer routes
+  try {
+    console.log('Loading product routes...');
+    const productRoutes = require('./routes/productRoutes');
+    app.use('/api/customer', productRoutes);
+    console.log('✅ Product routes loaded');
+  } catch (error) {
+    console.log('❌ Error loading product routes:', error.message);
+  }
 
-try {
-  console.log('Loading order routes...');
-  const orderRoutes = require('./routes/orderRoutes');
-  app.use('/api/customer', orderRoutes);
-  console.log('✅ Order routes loaded');
-} catch (error) {
-  console.log('❌ Error loading order routes:', error.message);
-}
+  try {
+    console.log('Loading order routes...');
+    const orderRoutes = require('./routes/orderRoutes');
+    app.use('/api/customer', orderRoutes);
+    console.log('✅ Order routes loaded');
+  } catch (error) {
+    console.log('❌ Error loading order routes:', error.message);
+  }
 
-try {
-  console.log('Loading customer profile routes...');
-  const customerRoutes = require('./routes/customerRoutes');
-  app.use('/api/customer', customerRoutes);
-  console.log('✅ Customer routes loaded');
-} catch (error) {
-  console.log('❌ Error loading customer routes:', error.message);
-}
+  try {
+    console.log('Loading customer profile routes...');
+    const customerRoutes = require('./routes/customerRoutes');
+    app.use('/api/customer', customerRoutes);
+    console.log('✅ Customer routes loaded');
+  } catch (error) {
+    console.log('❌ Error loading customer routes:', error.message);
+  }
 
-try {
-  console.log('Loading payment routes...');
-  const paymentRoutes = require('./routes/paymentRoutes');
-  app.use('/api/customer', paymentRoutes);
-  console.log('✅ Payment routes loaded');
-} catch (error) {
-  console.log('❌ Error loading payment routes:', error.message);
-}
+  try {
+    console.log('Loading payment routes...');
+    const paymentRoutes = require('./routes/paymentRoutes');
+    app.use('/api/customer', paymentRoutes);
+    console.log('✅ Payment routes loaded');
+  } catch (error) {
+    console.log('❌ Error loading payment routes:', error.message);
+  }
+
+  console.log('🎉 All routes loaded successfully');
+  
+}).catch(err => {
+  console.log('❌ Failed to initialize application:', err.message);
+});
 
 // Dashboard routes with enhanced session checking
 app.get('/admin/dashboard', (req, res) => {

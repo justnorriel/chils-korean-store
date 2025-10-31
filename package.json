@@ -11,7 +11,8 @@
     "test-mongodb": "node test-mongodb-connection.js",
     "diagnose-mongodb": "node diagnose-mongodb.js",
     "test-credentials": "node test-current-credentials.js",
-    "check-env": "node check-railway-env.js"
+    "check-env": "node check-railway-env.js",
+    "simple-test": "node simple-connection-test.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
