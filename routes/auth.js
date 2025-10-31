@@ -52,8 +52,7 @@ router.post('/login', async (req, res) => {
     // Find user by email with explicit options
     const user = await User.findOne({ email: email.toLowerCase() })
       .select('+password')
-      .maxTimeMS(30000) // 30 second timeout for this query
-      .readPreference('primary');
+      .maxTimeMS(30000); // 30 second timeout for this query
     
     if (!user) {
       console.log('❌ User not found:', email);
