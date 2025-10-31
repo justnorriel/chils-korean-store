@@ -29,7 +29,7 @@ git push -u origin main
 5. **Whitelist IP addresses** (add 0.0.0.0/0 for Railway)
 6. **Get connection string**:
    ```
-   mongodb+srv://username:password@cluster.mongodb.net/chils_korean_store
+   mongodb+srv://fabrianorriel_db_user:gsapdslgsKI8ZFDu@cluster0.ffganpu.mongodb.net/chils_korean_store?retryWrites=true&w=majority
    ```
 
 ### Step 3: Deploy to Railway
@@ -44,7 +44,7 @@ In Railway dashboard, go to your project → Settings → Variables and add:
 
 ```bash
 NODE_ENV=production
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/chils_korean_store
+MONGODB_URI=mongodb+srv://fabrianorriel_db_user:gsapdslgsKI8ZFDu@cluster0.ffganpu.mongodb.net/chils_korean_store?retryWrites=true&w=majority
 SESSION_SECRET=your_very_long_random_secret_here_at_least_32_characters
 ```
 
