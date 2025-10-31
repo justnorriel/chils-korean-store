@@ -25,9 +25,11 @@ const connectDB = async () => {
       socketTimeoutMS: 60000, // 60 seconds timeout
       bufferMaxEntries: 0, // Disable mongoose buffering
       bufferCommands: false, // Disable mongoose buffering
-      maxPoolSize: 10, // Maintain up to 10 socket connections
-      minPoolSize: 5, // Maintain at least 5 socket connections
+      maxPoolSize: 3, // Smaller pool for Railway
+      minPoolSize: 1, // Maintain 1 connection
       connectTimeoutMS: 30000, // 30 seconds timeout for initial connection
+      maxIdleTimeMS: 60000, // Keep idle connections longer
+      waitQueueTimeoutMS: 10000, // Railway can handle longer waits
     });
     console.log('✅ MongoDB connected successfully');
     console.log('📍 Database:', conn.connection.name);
