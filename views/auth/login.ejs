@@ -187,61 +187,6 @@
             border-color: #bae6fd;
         }
 
-        .demo-accounts {
-            background: #f8fafc;
-            border-radius: 8px;
-            padding: 20px;
-            margin-top: 25px;
-            border: 2px dashed #e2e8f0;
-        }
-
-        .demo-accounts h3 {
-            color: #475569;
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 12px;
-            text-align: center;
-        }
-
-        .demo-account {
-            background: white;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 8px;
-            border: 1px solid #e2e8f0;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .demo-account:hover {
-            border-color: #667eea;
-            transform: translateX(4px);
-        }
-
-        .demo-account:last-child {
-            margin-bottom: 0;
-        }
-
-        .demo-account .role {
-            font-weight: 600;
-            color: #667eea;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .demo-account .email {
-            color: #475569;
-            font-size: 14px;
-            margin-top: 2px;
-        }
-
-        .demo-account .password {
-            color: #94a3b8;
-            font-size: 12px;
-            margin-top: 2px;
-        }
-
         .loading {
             display: none;
         }
@@ -333,20 +278,6 @@
             </button>
         </form>
 
-        <div class="demo-accounts">
-            <h3>Demo Accounts (Click to Fill)</h3>
-            <div class="demo-account" onclick="fillDemoCredentials('admin@chilsstore.com', 'admin123')">
-                <div class="role">Administrator</div>
-                <div class="email">admin@chilsstore.com</div>
-                <div class="password">Password: admin123</div>
-            </div>
-            <div class="demo-account" onclick="fillDemoCredentials('customer@example.com', 'customer123')">
-                <div class="role">Customer</div>
-                <div class="email">customer@example.com</div>
-                <div class="password">Password: customer123</div>
-            </div>
-        </div>
-
         <div class="links">
             <a href="/auth/signup">Create New Account</a>
             <a href="/auth/forgot-password">Forgot Password?</a>
@@ -354,36 +285,6 @@
     </div>
 
     <script>
-        function fillDemoCredentials(email, password) {
-            document.getElementById('email').value = email;
-            document.getElementById('password').value = password;
-            
-            // Show success message
-            showTempMessage('Demo credentials filled! Click Sign In to continue.', 'success');
-        }
-
-        function showTempMessage(message, type) {
-            // Remove any existing temp messages
-            const existingAlert = document.querySelector('.alert-temp');
-            if (existingAlert) {
-                existingAlert.remove();
-            }
-
-            const alert = document.createElement('div');
-            alert.className = `alert alert-${type} alert-temp`;
-            alert.innerHTML = `
-                <i class="fas fa-${type === 'success' ? 'check' : 'info'}-circle"></i> ${message}
-            `;
-            
-            const form = document.getElementById('loginForm');
-            form.parentNode.insertBefore(alert, form);
-            
-            // Remove after 3 seconds
-            setTimeout(() => {
-                alert.remove();
-            }, 3000);
-        }
-
         // Form submission handling
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             const btn = document.getElementById('loginBtn');
